@@ -105,7 +105,7 @@ def build_tower(tower_text) -> Tower:
 
 print(build_tower(day_7_example).print_tower())
 print()
-with open("day 7/day 7.input") as f:
+with open("day 7.input") as f:
     root = build_tower(f.read())
 
 print(root)
