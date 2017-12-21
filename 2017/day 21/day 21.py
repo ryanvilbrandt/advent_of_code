@@ -1,18 +1,18 @@
+STARTING_PATTERN = [
+    ".#.",
+    "..#",
+    "###"
+]
 # STARTING_PATTERN = [
-#     ".#.",
-#     "..#",
-#     "###"
+#     ".##",
+#     "#.#",
+#     "..#"
 # ]
-STARTING_PATTERN = [
-    ".##",
-    "#.#",
-    "..#"
-]
-STARTING_PATTERN = [
-    "###",
-    "#..",
-    ".#."
-]
+# STARTING_PATTERN = [
+#     "###",
+#     "#..",
+#     ".#."
+# ]
 # STARTING_PATTERN = [
 #     "#..",
 #     "#.#",
