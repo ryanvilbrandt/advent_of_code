@@ -1,3 +1,6 @@
+import time
+
+## Normal patterns, rotated
 STARTING_PATTERN = [
     ".#.",
     "..#",
@@ -18,6 +21,31 @@ STARTING_PATTERN = [
 #     "#.#",
 #     "##."
 # ]
+
+
+## Flipped patterns
+# STARTING_PATTERN = [
+#     ".#.",
+#     "#..",
+#     "###"
+# ]
+# STARTING_PATTERN = [
+#     "..#",
+#     "#.#",
+#     ".##"
+# ]
+# STARTING_PATTERN = [
+#     "###",
+#     "..#",
+#     ".#."
+# ]
+# STARTING_PATTERN = [
+#     "##.",
+#     "#.#",
+#     "#.."
+# ]
+
+
 # STARTING_PATTERN = [
 #     "....",
 #     "....",
@@ -50,14 +78,18 @@ def find_matching_rule(grid, x, y, size, rules):
 
 def compare_to_rule(grid, x, y, size, rule):
     return (
-        do_compare(grid, x, y, size, rule, orientation=0) or
-        do_compare(grid, x, y, size, rule, orientation=90) or
-        do_compare(grid, x, y, size, rule, orientation=180) or
-        do_compare(grid, x, y, size, rule, orientation=270)
+        do_compare(grid, x, y, size, rule, orientation=0, flipped=False) or
+        do_compare(grid, x, y, size, rule, orientation=90, flipped=False) or
+        do_compare(grid, x, y, size, rule, orientation=180, flipped=False) or
+        do_compare(grid, x, y, size, rule, orientation=270, flipped=False) or
+        do_compare(grid, x, y, size, rule, orientation=0, flipped=True) or
+        do_compare(grid, x, y, size, rule, orientation=90, flipped=True) or
+        do_compare(grid, x, y, size, rule, orientation=180, flipped=True) or
+        do_compare(grid, x, y, size, rule, orientation=270, flipped=True)
     )
 
 
-def do_compare(grid, x, y, size, rule, orientation=0):
+def do_compare(grid, x, y, size, rule, orientation=0, flipped=False):
     """
     Does a comparison between a grid square and a rule.
     :param grid:
@@ -77,18 +109,32 @@ def do_compare(grid, x, y, size, rule, orientation=0):
     a, b = 0, 0
     for i in range(size):
         for j in range(size):
-            if orientation == 0:
-                a = y + i
-                b = x + j
-            elif orientation == 90:
-                a = y + size - j - 1
-                b = x + i
-            elif orientation == 180:
-                a = y + size - i - 1
-                b = x + size - j - 1
-            elif orientation == 270:
-                a = y + j
-                b = x + size - i - 1
+            if not flipped:
+                if orientation == 0:
+                    a = y + i
+                    b = x + j
+                elif orientation == 90:
+                    a = y + size - j - 1
+                    b = x + i
+                elif orientation == 180:
+                    a = y + size - i - 1
+                    b = x + size - j - 1
+                elif orientation == 270:
+                    a = y + j
+                    b = x + size - i - 1
+            else:
+                if orientation == 0:
+                    a = y + i
+                    b = x + size - j - 1
+                elif orientation == 90:
+                    a = y + size - j - 1
+                    b = x + size - i - 1
+                elif orientation == 180:
+                    a = y + size - i - 1
+                    b = x + j
+                elif orientation == 270:
+                    a = y + j
+                    b = x + i
             # print(i, j, a, b)
             if not grid[a][b] == rule[i][j]:
                 return False
@@ -147,22 +193,29 @@ def print_grid(grid):
 
 
 def run_patterns(grid, rules, iterations=5):
-    print_grid(grid)
-    print()
+    # print_grid(grid)
+    # print()
     for i in range(iterations):
         grid = process_grid(grid, rules)
-        print_grid(grid)
-        print()
+        # print_grid(grid)
+        # print()
     return grid
 
 
-with open("example_test.input") as f:
-    a = f.read()
-# with open("day 21.input") as f:
-#     a = f.read()
+def count_pixels(grid):
+    return "".join(grid).count("#")
 
 
-rules = build_rules(a)
-# print(rules)
-# print(compare_to_rule(STARTING_PATTERN, 0, 0, 3, rules[1][0]))
-print_grid(run_patterns(STARTING_PATTERN, rules))
+with open("example.input") as f:
+    example = f.read()
+with open("day 21.input") as f:
+    my_input = f.read()
+
+
+# rules = build_rules(example)
+# print(count_pixels(run_patterns(STARTING_PATTERN, rules, iterations=2)))
+
+t1 = time.time()
+rules = build_rules(my_input)
+print(count_pixels(run_patterns(STARTING_PATTERN, rules, iterations=18)))
+print(time.time() - t1)
