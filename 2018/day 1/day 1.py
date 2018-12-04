@@ -4,13 +4,10 @@ def day_1_a(frequency_shifts):
     :return:
     """
 
-    frequency_shifts = frequency_shifts.replace('\n', ',').split(',')
+    frequency_shifts = frequency_shifts.strip('\n').replace('\n', ',').split(',')
 
     def freq_fix(f):
-        try:
-            return int(f.strip())
-        except ValueError:
-            return 0
+        return int(f.strip())
 
     return sum(map(freq_fix, frequency_shifts))
 
@@ -29,15 +26,12 @@ def day_1_b(frequency_shifts):
     :return:
     """
 
-    frequency_shifts = frequency_shifts.replace('\n', ',').split(',')
+    frequency_shifts = frequency_shifts.strip('\n').replace('\n', ',').split(',')
     visited_frequencies = {0}
     total = 0
 
     def freq_fix(f):
-        try:
-            return int(f.strip())
-        except ValueError:
-            return 0
+        return int(f.strip())
 
     while True:
         for f in frequency_shifts:
