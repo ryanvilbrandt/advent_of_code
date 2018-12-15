@@ -38,35 +38,29 @@ def print_map(point_dict, start_x, end_x, start_y, end_y):
     :return:
     """
     map = [['.' for x in range(start_x, end_x)] for y in range(start_y, end_y)]
-    print(start_x, end_x, start_y, end_y)
     for i, p in enumerate(point_dict):
-        print(i, p)
-        map[p[1]][p[0]] = labels[i]
+        map[p[1] - start_y][p[0] - start_x] = labels[i]
         for q in point_dict[p]:
-            map[q[1]][q[0]] = labels[i].lower()
+            map[q[1] - start_y][q[0] - start_x] = labels[i].lower()
     for row in map:
         print("".join(row))
 
 
 def build_map(in_str):
     processed_input = preprocess_input(in_str)
-    print(processed_input)
     # Init area dict
     area_dict = OrderedDict()
     for p in processed_input:
         area_dict[p] = []
-    print(area_dict)
     # Determine the borders of the map
     x_coords, y_coords = list(zip(*area_dict.keys()))
-    start_x = min(x_coords)
-    end_x = max(x_coords)
-    start_y = min(y_coords)
-    end_y = max(y_coords)
-    print_map(area_dict, start_x, end_x, start_y, end_y)
-    print()
+    start_x = min(x_coords) - 1
+    end_x = max(x_coords) + 1
+    start_y = min(y_coords) - 1
+    end_y = max(y_coords) + 1
     # Check closest point for all points in the given area
-    for y in range(start_y, end_y):
-        for x in range(start_x, end_x):
+    for y in range(start_y, end_y + 1):
+        for x in range(start_x, end_x + 1):
             test_point = x, y
             # Don't test main points
             if test_point in area_dict.keys():
@@ -74,8 +68,50 @@ def build_map(in_str):
             closest_point = find_closest_point(test_point, area_dict)
             if closest_point:
                 area_dict[closest_point].append(test_point)
-    print(dict(area_dict))
-    print_map(area_dict, start_x, end_x, start_y, end_y)
+    # Count up max area
+    # Check for infinite areas by excluding all points whose area falls on the boundary
+    max_area = 0
+    for i, p in enumerate(area_dict):
+        x_coords, y_coords = list(zip(*area_dict[p]))
+        if not ((min(x_coords) == start_x) or
+                (max(x_coords) == end_x) or
+                (min(y_coords) == start_y) or
+                (max(y_coords) == end_y)):
+            area_count = len(area_dict[p]) + 1
+            if area_count > max_area:
+                max_area = area_count
+    return max_area
 
 
-build_map(day_6_example)
+assert build_map(day_6_example) == 17
+with open("day 6.input") as f:
+    print(build_map(f.read()))
+
+
+def find_total_distance(test_point, coord_list):
+    return sum([abs(p[0] - test_point[0]) + abs(p[1] - test_point[1])
+                for p in coord_list])
+
+
+def find_safe_region(in_str, threshold):
+    processed_input = preprocess_input(in_str)
+    # Determine the borders of the map
+    x_coords, y_coords = list(zip(*processed_input))
+    start_x = min(x_coords) - 1
+    end_x = max(x_coords) + 1
+    start_y = min(y_coords) - 1
+    end_y = max(y_coords) + 1
+    # Check total distance for all points in the given area
+    region_size = 0
+    for y in range(start_y, end_y + 1):
+        for x in range(start_x, end_x + 1):
+            test_point = x, y
+            total_distance = find_total_distance(test_point, processed_input)
+            if total_distance < threshold:
+                region_size += 1
+    return region_size
+
+
+assert find_safe_region(day_6_example, 32) == 16
+with open("day 6.input") as f:
+    print(find_safe_region(f.read(), 10000))
