@@ -17,6 +17,9 @@ class IntCode:
         self.last_instructions = []
         self.input_buffer = input_buffer if input_buffer is not None else []
 
+    def set_input_buffer(self, input_buffer):
+        self.input_buffer = input_buffer
+
     def run(self):
         self.index = 0
         while True:
@@ -145,11 +148,16 @@ def get_amplified_output(program: str, phase_setting: int, amp_input: int):
     return intcode.run()
 
 
-def run_amplifiers(program: str, amp_modes: Union[str, Tuple[Any]]):
+def run_amplifiers(program: str, amp_modes: Union[str, Tuple[Any]], loop=False):
     amp_modes = [int(c) for c in amp_modes]
+    amplifiers = [IntCode(program) for _ in range(len(amp_modes))]
     output = 0
-    for m in amp_modes:
-        output = IntCode(program, [m, output]).run()
+    while True:
+        for amp, mode in zip(amplifiers, amp_modes):
+            amp.set_input_buffer([mode, output])
+            output = amp.run()
+        if not loop:
+            break
     return output
 
 
