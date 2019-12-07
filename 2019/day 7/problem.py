@@ -1,11 +1,15 @@
 import time
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 
 class Mode(Enum):
     POSITIONAL = 0
     IMMEDIATE = 1
+
+
+AMP_MODE_BASE = 5
+MAX_AMP_MODE = 5**5 - 1
 
 
 class IntCode:
@@ -63,7 +67,7 @@ class IntCode:
         if not self.input_buffer:
             raise ValueError("Input buffer is empty")
         input_num = self.input_buffer.pop(0)
-        print("Using input: {}".format(input_num))
+        # print("Using input: {}".format(input_num))
         self.set(1, input_num, mode_map)
         self.index += 2
 
@@ -145,4 +149,35 @@ def get_amplified_output(program: str, phase_setting: int, amp_input: int):
     intcode = IntCode(program, [phase_setting, amp_input])
     return intcode.run()
 
-assert get_amplified_output("3,11,3,12,1,11,12,13,4,13,99,0,0,0", 5, 2) == 7
+
+def run_amplifiers(program: str, amp_modes: Union[str, List[int]]):
+    if isinstance(amp_modes, str):
+        amp_modes = [int(c) for c in amp_modes]
+    output = 0
+    for m in amp_modes:
+        output = IntCode(program, [m, output]).run()
+    return output
+
+
+def in_base(num, base):
+    if not isinstance(base, int) or base <= 1:
+        return ValueError("Invalid base {}".format(base))
+    if num == 0:
+        return "0"
+    s = ""
+    while num > 0:
+        s = str(num % base) + s
+        num //= base
+    return s
+
+
+def find_max_thruster_setting(program: str):
+    max_thrust = 0
+    max_mode = 0
+    for i in range(MAX_AMP_MODE + 1):
+        mode = "{:>05}".format(in_base(i, AMP_MODE_BASE))
+        thrust = run_amplifiers(program, mode)
+        if thrust > max_thrust:
+            max_thrust = thrust
+            max_mode = mode
+    return max_mode
