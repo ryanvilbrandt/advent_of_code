@@ -5,6 +5,7 @@ from .problem import get_amplified_output, run_amplifiers, in_base, AMP_MODE_BAS
 
 A_PLUS_B = "3,11,3,12,1,11,12,13,4,13,99,0,0,0"
 
+
 class TestDay7(unittest.TestCase):
 
     def test_get_amplified_output(self):
