@@ -1,15 +1,11 @@
-import time
+import itertools
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Tuple, Any
 
 
 class Mode(Enum):
     POSITIONAL = 0
     IMMEDIATE = 1
-
-
-AMP_MODE_BASE = 5
-MAX_AMP_MODE = 5**5 - 1
 
 
 class IntCode:
@@ -34,7 +30,6 @@ class IntCode:
                     self.last_instructions
                 )
             self.instruction()
-            # time.sleep(1)
 
     def print_tape(self):
         print(self.tape)
@@ -150,34 +145,15 @@ def get_amplified_output(program: str, phase_setting: int, amp_input: int):
     return intcode.run()
 
 
-def run_amplifiers(program: str, amp_modes: Union[str, List[int]]):
-    if isinstance(amp_modes, str):
-        amp_modes = [int(c) for c in amp_modes]
+def run_amplifiers(program: str, amp_modes: Union[str, Tuple[Any]]):
+    amp_modes = [int(c) for c in amp_modes]
     output = 0
     for m in amp_modes:
         output = IntCode(program, [m, output]).run()
     return output
 
 
-def in_base(num, base):
-    if not isinstance(base, int) or base <= 1:
-        return ValueError("Invalid base {}".format(base))
-    if num == 0:
-        return "0"
-    s = ""
-    while num > 0:
-        s = str(num % base) + s
-        num //= base
-    return s
-
-
-def find_max_thruster_setting(program: str):
-    max_thrust = 0
-    max_mode = 0
-    for i in range(MAX_AMP_MODE + 1):
-        mode = "{:>05}".format(in_base(i, AMP_MODE_BASE))
-        thrust = run_amplifiers(program, mode)
-        if thrust > max_thrust:
-            max_thrust = thrust
-            max_mode = mode
-    return max_mode
+def find_max_thruster_setting(program: str, phase_list=None):
+    if phase_list is None:
+        phase_list = [0, 1, 2, 3, 4]
+    return max([run_amplifiers(program, p) for p in itertools.permutations(phase_list)])
