@@ -13,30 +13,23 @@ class IntCode:
     def __init__(self, tape: str, input_buffer: List[int]=None):
         self.tape = [int(i.strip()) for i in tape.split(',')]
         self.index = 0
-        self.diagnostic_code = 0
         self.last_instructions = []
         self.input_buffer = input_buffer if input_buffer is not None else []
+        self.halted = False
 
-    def set_input_buffer(self, input_buffer):
-        self.input_buffer = input_buffer
+    def add_to_input_buffer(self, value):
+        self.input_buffer.append(value)
 
     def run(self):
-        self.index = 0
-        while True:
+        while not self.halted:
             # self.print_tape()
-            if self.tape[self.index] == 99:
-                return self.diagnostic_code
-            if self.diagnostic_code != 0:
-                raise DiagnosticCodeError(
-                    self.diagnostic_code,
-                    self.tape,
-                    self.last_instructions
-                )
-            self.instruction()
+            output = self.instruction()
+            if output is not None:
+                return output
 
     def print_tape(self):
         print(self.tape)
-        indent = sum([len(str(i) + ", ") for i in self.tape[:self.index + 1]]) - 2
+        indent = len(", ".join([str(i) for i in self.tape[:self.index + 1]]))
         print(indent * " " + "^")
 
     def instruction(self):
@@ -71,8 +64,9 @@ class IntCode:
 
     def send_output(self, mode_map: int):
         self.add_to_instruction_history(2)
-        self.diagnostic_code = self.get(1, mode_map)
+        diagnostic_code = self.get(1, mode_map)
         self.index += 2
+        return diagnostic_code
 
     def jump_if_true(self, mode_map: int):
         self.add_to_instruction_history(3)
@@ -100,6 +94,10 @@ class IntCode:
         self.set(3, value, mode_map)
         self.index += 4
 
+    def halt(self, mode_map: int):
+        self.add_to_instruction_history(1)
+        self.halted = True
+
     operations = {
         1: add,
         2: multiply,
@@ -108,7 +106,8 @@ class IntCode:
         5: jump_if_true,
         6: jump_if_false,
         7: less_than,
-        8: equal
+        8: equal,
+        99: halt
     }
 
     def add_to_instruction_history(self, i):
@@ -132,8 +131,15 @@ class IntCode:
         else:
             raise Exception("HALT AND CATCH FIRE")
 
-    def get_mode(self, pos: int, mode_map: int):
+    @staticmethod
+    def get_mode(pos: int, mode_map: int):
         return (mode_map // (10 ** (pos - 1))) % 10
+
+    def __str__(self):
+        return f"IntCode()"
+
+    def __repr__(self):
+        return f"IntCode(index={self.index}, input_buffer={self.input_buffer})"
 
 
 class DiagnosticCodeError(Exception):
@@ -148,20 +154,26 @@ def get_amplified_output(program: str, phase_setting: int, amp_input: int):
     return intcode.run()
 
 
-def run_amplifiers(program: str, amp_modes: Union[str, Tuple[Any]], loop=False):
+def run_amplifiers(program: str, amp_modes: Union[str, Tuple[Any]]):
     amp_modes = [int(c) for c in amp_modes]
     amplifiers = [IntCode(program) for _ in range(len(amp_modes))]
+    # Set modes
+    for amp, mode in zip(amplifiers, amp_modes):
+        amp.add_to_input_buffer(mode)
     output = 0
-    while True:
-        for amp, mode in zip(amplifiers, amp_modes):
-            amp.set_input_buffer([mode, output])
+    loop_output = None
+    while all([not amp.halted for amp in amplifiers]):
+        for amp in amplifiers:
+            amp.add_to_input_buffer(output)
             output = amp.run()
-        if not loop:
-            break
-    return output
+            # print(output)
+        if output is not None:
+            loop_output = output
+    return loop_output
 
 
-def find_max_thruster_setting(program: str, phase_list=None):
+def find_max_thrust(program: str, phase_list=None):
     if phase_list is None:
         phase_list = [0, 1, 2, 3, 4]
-    return max([run_amplifiers(program, p) for p in itertools.permutations(phase_list)])
+    results = [run_amplifiers(program, p) for p in itertools.permutations(phase_list)]
+    return max(results)
