@@ -143,6 +143,50 @@ class IntCode:
     def __repr__(self):
         return f"IntCode(index={self.index}, input_buffer={self.input_buffer})"
 
+    def pprint(self):
+        index = 0
+        while index < len(self.tape):
+            op_code = self.tape[index]
+            mode_op = op_code % 100
+            mode_params = op_code // 100
+            if mode_op == 1:
+                op = "add"
+                num_params = 3
+            elif mode_op == 2:
+                op = "mul"
+                num_params = 3
+            elif mode_op == 3:
+                op = "inp"
+                num_params = 1
+            elif mode_op == 4:
+                op = "out"
+                num_params = 1
+            elif mode_op == 5:
+                op = "jmt"
+                num_params = 2
+            elif mode_op == 6:
+                op = "jmf"
+                num_params = 2
+            elif mode_op == 7:
+                op = "lth"
+                num_params = 3
+            elif mode_op == 8:
+                op = "equ"
+                num_params = 3
+            elif mode_op == 99:
+                op = "hal"
+                num_params = 0
+            else:
+                op = "nop"
+                num_params = 0
+            params = []
+            for i in range(num_params):
+                param_mode = "pos" if mode_params % 10 == 0 else "imm"
+                mode_params //= 10
+                params.append("{}({})".format(param_mode, self.tape[index + i + 1]))
+            print("{:>04} {} {}".format(index, op, " ".join(params)))
+            index += 1 + num_params
+
 
 class OutOfTapeException(Exception):
     pass

@@ -1,4 +1,6 @@
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 
 from aoc_2019.common.intcode import IntCode, OutOfTapeException, InvalidOperationException, EmptyInputBufferException
 
@@ -96,6 +98,56 @@ class TestIntCode(unittest.TestCase):
         self.assertEqual(999, IntCode(program).add_to_input_buffer(7).run())
         self.assertEqual(1000, IntCode(program).add_to_input_buffer(8).run())
         self.assertEqual(1001, IntCode(program).add_to_input_buffer(9).run())
+
+    def test_pretty_print(self):
+        f = StringIO()
+        with redirect_stdout(f):
+            IntCode("1,2,3,5,99,0").pprint()
+        expected = [
+            "0000 add pos(2) pos(3) pos(5)",
+            "0004 hal ",
+            "0005 nop ",
+        ]
+        self.assertEqual("\n".join(expected) + "\n", f.getvalue())
+
+    def test_pretty_print_imm(self):
+        f = StringIO()
+        with redirect_stdout(f):
+            IntCode("11001,2,3,5,99,0").pprint()
+        expected = [
+            "0000 add pos(2) imm(3) pos(5)",
+            "0004 hal ",
+            "0005 nop ",
+        ]
+        self.assertEqual("\n".join(expected) + "\n", f.getvalue())
+
+    def test_pretty_print_all_ops(self):
+        f = StringIO()
+        with redirect_stdout(f):
+            IntCode("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,"
+                    "1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99").pprint()
+        expected = [
+            "0000 inp pos(21)",
+            "0002 equ pos(21) imm(8) pos(20)",
+            "0006 jmt pos(20) imm(22)",
+            "0009 lth imm(8) pos(21) pos(20)",
+            "0013 jmf pos(20) imm(31)",
+            "0016 jmf imm(0) imm(36)",
+            "0019 nop ",
+            "0020 nop ",
+            "0021 nop ",
+            "0022 mul pos(21) imm(125) pos(20)",
+            "0026 out pos(20)",
+            "0028 jmt imm(1) imm(46)",
+            "0031 out imm(999)",
+            "0033 jmt imm(1) imm(46)",
+            "0036 add imm(1000) imm(1) pos(20)",
+            "0040 out pos(20)",
+            "0042 jmt imm(1) imm(46)",
+            "0045 nop ",
+            "0046 hal ",
+        ]
+        self.assertEqual("\n".join(expected) + "\n", f.getvalue())
 
 
 if __name__ == "__main__":
