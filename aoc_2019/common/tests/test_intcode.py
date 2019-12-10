@@ -162,6 +162,25 @@ class TestIntCode(unittest.TestCase):
         s = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
         self.assertEqual(s, IntCode(s).run_until_halted())
 
+    def test_day_9_example_2(self):
+        s = "1102,34915192,34915192,7,4,7,99,0"
+        self.assertEqual(16, len(str(IntCode(s).run())))
+
+    def test_day_9_example_3(self):
+        self.assertEqual(1125899906842624, IntCode("104,1125899906842624,99").run())
+
+    def test_day_9_part_1(self):
+        with open("../../day_9/input.text") as f:
+            intcode = IntCode(f.read())
+        intcode.add_to_input_buffer(1)
+        self.assertEqual(2789104029, intcode.run())
+
+    def test_day_9_part_2(self):
+        with open("../../day_9/input.text") as f:
+            intcode = IntCode(f.read())
+        intcode.add_to_input_buffer(2)
+        print(intcode.run())
+
 
 if __name__ == "__main__":
     unittest.main()
