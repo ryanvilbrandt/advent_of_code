@@ -1,20 +1,35 @@
+from collections import defaultdict
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 
 class Mode(Enum):
     POSITIONAL = 0
     IMMEDIATE = 1
+    RELATIVE_BASE = 2
 
 
 class IntCode:
 
-    def __init__(self, tape: str, input_buffer: List[int]=None):
-        self.tape = [int(i.strip()) for i in tape.split(',')]
+    def __init__(self, tape: Union[str, List[int]], input_buffer: List[int]=None):
+        self.tape = self.build_tape(tape)
         self.index = 0
+        self.relative_base = 0
         self.last_instructions = []
         self.input_buffer = input_buffer if input_buffer is not None else []
         self.halted = False
+
+    @staticmethod
+    def build_tape(s: Union[str, List[int]]):
+        if isinstance(s, str):
+            s = [int(v.strip()) for v in s.split(',')]
+        tape = defaultdict(int)
+        for i, v in enumerate(s):
+            tape[i] = v
+        return tape
+
+    def get_tape(self):
+        return [self.tape[i] for i in range(max(self.tape.keys()) + 1)]
 
     def add_to_input_buffer(self, value):
         self.input_buffer.append(value)
@@ -29,9 +44,18 @@ class IntCode:
             if output is not None:
                 return output
 
+    def run_until_halted(self):
+        output_list = []
+        while True:
+            output = self.run()
+            if self.halted:
+                break
+            output_list.append(output)
+        return output_list
+
     def print_tape(self):
-        print(self.tape)
-        indent = len(", ".join([str(i) for i in self.tape[:self.index + 1]]))
+        print(self.get_tape())
+        indent = len(", ".join([str(self.tape[i]) for i in range(self.index + 1)]))
         print(indent * " " + "^")
 
     def instruction(self):
@@ -96,6 +120,11 @@ class IntCode:
         self.set(3, value, mode_map)
         self.index += 4
 
+    def adjust_relative_base(self, mode_map: int):
+        self.add_to_instruction_history(2)
+        self.relative_base += self.get(1, mode_map)
+        self.index += 2
+
     def halt(self, mode_map: int):
         self.add_to_instruction_history(1)
         self.halted = True
@@ -109,11 +138,12 @@ class IntCode:
         6: jump_if_false,
         7: less_than,
         8: equal,
+        9: adjust_relative_base,
         99: halt
     }
 
-    def add_to_instruction_history(self, i):
-        self.last_instructions.append(self.tape[self.index: self.index + i])
+    def add_to_instruction_history(self, length):
+        self.last_instructions.append([self.tape[self.index + i] for i in range(length)])
 
     def get(self, pos: int, mode_map: int) -> int:
         mode = self.get_mode(pos, mode_map)
@@ -121,6 +151,8 @@ class IntCode:
             return self.tape[self.tape[self.index + pos]]
         elif mode == Mode.IMMEDIATE.value:
             return self.tape[self.index + pos]
+        elif mode == Mode.RELATIVE_BASE.value:
+            return self.tape[self.relative_base + self.tape[self.index + pos]]
         else:
             raise Exception("HALT AND CATCH FIRE")
 
@@ -130,6 +162,8 @@ class IntCode:
             self.tape[self.tape[self.index + pos]] = value
         elif mode == Mode.IMMEDIATE.value:
             self.tape[self.index + pos] = value
+        elif mode == Mode.RELATIVE_BASE.value:
+            self.tape[self.relative_base + self.tape[self.index + pos]] = value
         else:
             raise Exception("HALT AND CATCH FIRE")
 
@@ -173,6 +207,9 @@ class IntCode:
             elif mode_op == 8:
                 op = "equ"
                 num_params = 3
+            elif mode_op == 9:
+                op = "rel"
+                num_params = 1
             elif mode_op == 99:
                 op = "hal"
                 num_params = 0
@@ -181,7 +218,7 @@ class IntCode:
                 num_params = 0
             params = []
             for i in range(num_params):
-                param_mode = "pos" if mode_params % 10 == 0 else "imm"
+                param_mode = {0: "pos", 1: "imm", 2: "rel"}[mode_params % 10]
                 mode_params //= 10
                 params.append("{}({})".format(param_mode, self.tape[index + i + 1]))
             print("{:>04} {} {}".format(index, op, " ".join(params)))

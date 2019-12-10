@@ -10,28 +10,28 @@ class TestIntCode(unittest.TestCase):
     def test_addition(self):
         intcode = IntCode("1,0,0,0,99")
         intcode.run()
-        self.assertEqual([2, 0, 0, 0, 99], intcode.tape)
+        self.assertEqual([2, 0, 0, 0, 99], intcode.get_tape())
         intcode = IntCode("1,2,3,5,99,0")
         intcode.run()
-        self.assertEqual([1, 2, 3, 5, 99, 8], intcode.tape)
+        self.assertEqual([1, 2, 3, 5, 99, 8], intcode.get_tape())
 
     def test_multiplication(self):
         intcode = IntCode("2,3,0,3,99")
         intcode.run()
-        self.assertEqual([2, 3, 0, 6, 99], intcode.tape)
+        self.assertEqual([2, 3, 0, 6, 99], intcode.get_tape())
         intcode = IntCode("2,4,4,5,99,0")
         intcode.run()
-        self.assertEqual([2, 4, 4, 5, 99, 9801], intcode.tape)
+        self.assertEqual([2, 4, 4, 5, 99, 9801], intcode.get_tape())
 
     def test_mixed(self):
         intcode = IntCode("1,9,10,3,2,3,11,0,99,30,40,50")
         intcode.run()
-        self.assertEqual([3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50], intcode.tape)
+        self.assertEqual([3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50], intcode.get_tape())
 
     def test_multiple_halts(self):
         intcode = IntCode("1,1,1,4,99,5,6,0,99")
         intcode.run()
-        self.assertEqual([30, 1, 1, 4, 2, 5, 6, 0, 99], intcode.tape)
+        self.assertEqual([30, 1, 1, 4, 2, 5, 6, 0, 99], intcode.get_tape())
 
     def test_no_halt(self):
         with self.assertRaises(OutOfTapeException):
@@ -113,7 +113,7 @@ class TestIntCode(unittest.TestCase):
     def test_pretty_print_imm(self):
         f = StringIO()
         with redirect_stdout(f):
-            IntCode("11001,2,3,5,99,0").pprint()
+            IntCode("1001,2,3,5,99,0").pprint()
         expected = [
             "0000 add pos(2) imm(3) pos(5)",
             "0004 hal ",
@@ -125,7 +125,7 @@ class TestIntCode(unittest.TestCase):
         f = StringIO()
         with redirect_stdout(f):
             IntCode("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,"
-                    "1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99").pprint()
+                    "1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99,209,69").pprint()
         expected = [
             "0000 inp pos(21)",
             "0002 equ pos(21) imm(8) pos(20)",
@@ -146,8 +146,21 @@ class TestIntCode(unittest.TestCase):
             "0042 jmt imm(1) imm(46)",
             "0045 nop ",
             "0046 hal ",
+            "0047 rel rel(69)"
         ]
         self.assertEqual("\n".join(expected) + "\n", f.getvalue())
+
+    def test_relative_base(self):
+        intcode = IntCode("109,15,204,-6,109,-10,204,5,99,27,28")
+        self.assertEqual(0, intcode.relative_base)
+        self.assertEqual(27, intcode.run())
+        self.assertEqual(15, intcode.relative_base)
+        self.assertEqual(28, intcode.run())
+        self.assertEqual(5, intcode.relative_base)
+
+    def test_day_9_example_1(self):
+        s = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
+        self.assertEqual(s, IntCode(s).run_until_halted())
 
 
 if __name__ == "__main__":
