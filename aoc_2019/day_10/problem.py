@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Tuple, List
 
 
@@ -36,9 +37,9 @@ def get_best_view(s):
 class SlopeBuckets:
 
     def __init__(self):
-        self.left_or_right = set()
-        self.top = set()
-        self.bottom = set()
+        self.left_or_right = defaultdict(list)
+        self.top = defaultdict(list)
+        self.bottom = defaultdict(list)
 
     def put_slope_in_bucket(self, origin: Tuple[int, int], target: Tuple[int, int]):
         if origin == target:
@@ -46,11 +47,11 @@ class SlopeBuckets:
         x = target[0] - origin[0]
         y = target[1] - origin[1]
         if y == 0:
-            self.left_or_right.add("left" if x < 0 else "right")
+            self.left_or_right["left" if x < 0 else "right"].append(target)
         elif y < 0:
-            self.top.add(x / y)
+            self.top[x / y].append(target)
         elif y > 0:
-            self.bottom.add(x / y)
+            self.bottom[x / y].append(target)
         else:
             raise Exception("HALT AND CATCH FIRE")
 
