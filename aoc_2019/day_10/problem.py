@@ -35,6 +35,14 @@ def get_best_view(s):
     return max(views.items(), key=lambda x: x[1])
 
 
+def shoot_all_asteroids(s, origin: Tuple[int, int]):
+    coords_list = get_coords(str_to_grid(s))
+    buckets = SlopeBuckets()
+    buckets.sort_points_into_buckets(origin, coords_list)
+    buckets.sort_lists_in_buckets(origin)
+    return buckets.shoot_asteroids()
+
+
 class SlopeBuckets:
 
     def __init__(self):
@@ -48,10 +56,10 @@ class SlopeBuckets:
         y = target[1] - origin[1]
         if x == 0:
             # If it's straight up, put it in the right section
-            if y < 0:
-                self.right[inf].append(target)
+            if y > 0:
+                self.left[-inf].append(target)
             else:
-                self.left[inf].append(target)
+                self.right[-inf].append(target)
         elif x < 0:
             self.left[y / x].append(target)
         elif x > 0:
@@ -82,3 +90,13 @@ class SlopeBuckets:
         for slope, coords_list in bucket.items():
             coords_list.sort(key=sort_key)
 
+    def shoot_asteroids(self):
+        asteroid_list = []
+        while self.count_buckets() > 0:
+            for bucket in [self.right, self.left]:
+                for k in sorted(bucket.keys()):
+                    if bucket[k]:
+                        asteroid_list.append(bucket[k].pop(0))
+                        if not bucket[k]:
+                            del bucket[k]
+        return asteroid_list
