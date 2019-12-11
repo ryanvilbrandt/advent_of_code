@@ -15,32 +15,33 @@ class TestDay7(unittest.TestCase):
     def test_put_slopes_in_buckets(self):
         buckets = SlopeBuckets()
         buckets.put_slope_in_bucket((3, 3), (1, 1))
-        self.assertEqual({1.0: [(1, 1)]}, buckets.top)
+        self.assertEqual({1.0: [(1, 1)]}, buckets.left)
         buckets.put_slope_in_bucket((3, 3), (2, 2))
-        self.assertEqual({1.0: [(1, 1), (2, 2)]}, buckets.top)
+        self.assertEqual({1.0: [(1, 1), (2, 2)]}, buckets.left)
         buckets.put_slope_in_bucket((3, 3), (5, 1))
-        self.assertEqual({1.0: [(1, 1), (2, 2)], -1.0: [(5, 1)]}, buckets.top)
+        self.assertEqual({1.0: [(1, 1), (2, 2)]}, buckets.left)
+        self.assertEqual({-1.0: [(5, 1)]}, buckets.right)
         buckets.put_slope_in_bucket((3, 3), (4, 1))
-        self.assertEqual({1.0: [(1, 1), (2, 2)], -1.0: [(5, 1)], -0.5: [(4, 1)]}, buckets.top)
+        self.assertEqual({1.0: [(1, 1), (2, 2)]}, buckets.left)
+        self.assertEqual({-1.0: [(5, 1)], -2.0: [(4, 1)]}, buckets.right)
         buckets.put_slope_in_bucket((3, 3), (3, 1))
-        self.assertEqual({1.0: [(1, 1), (2, 2)], -1.0: [(5, 1)], -0.5: [(4, 1)], 0: [(3, 1)]}, buckets.top)
+        self.assertEqual({1.0: [(1, 1), (2, 2)]}, buckets.left)
+        self.assertEqual({-1.0: [(5, 1)], -2.0: [(4, 1)], inf: [(3, 1)]}, buckets.right)
         buckets.put_slope_in_bucket((3, 3), (3, 5))
         buckets.put_slope_in_bucket((3, 3), (4, 5))
-        self.assertEqual({1.0: [(1, 1), (2, 2)], -1.0: [(5, 1)], -0.5: [(4, 1)], 0: [(3, 1)]}, buckets.top)
-        self.assertEqual({0: [(3, 5)], 0.5: [(4, 5)]}, buckets.bottom)
+        self.assertEqual({1.0: [(1, 1), (2, 2)], inf: [(3, 5)]}, buckets.left)
+        self.assertEqual({-1.0: [(5, 1)], -2.0: [(4, 1)], inf: [(3, 1)], 2.0: [(4, 5)]}, buckets.right)
         buckets.put_slope_in_bucket((3, 3), (0, 3))
         buckets.put_slope_in_bucket((3, 3), (5, 3))
-        self.assertEqual({1.0: [(1, 1), (2, 2)], -1.0: [(5, 1)], -0.5: [(4, 1)], 0: [(3, 1)]}, buckets.top)
-        self.assertEqual({0: [(3, 5)], 0.5: [(4, 5)]}, buckets.bottom)
-        self.assertEqual({"left": [(0, 3)], "right": [(5, 3)]}, buckets.left_or_right)
+        self.assertEqual({1.0: [(1, 1), (2, 2)], inf: [(3, 5)], -0.0: [(0, 3)]}, buckets.left)
+        self.assertEqual({-1.0: [(5, 1)], -2.0: [(4, 1)], inf: [(3, 1)], 2.0: [(4, 5)], 0.0: [(5, 3)]}, buckets.right)
 
     def test_sort_coords(self):
         buckets = SlopeBuckets()
         coords = [(1, 1), (2, 2), (5, 1), (4, 1), (3, 1), (3, 5), (4, 5), (0, 3), (5, 3), (3, 3)]
-        buckets.sort_points((3, 3), coords)
-        self.assertEqual({1.0: [(1, 1), (2, 2)], -1.0: [(5, 1)], -0.5: [(4, 1)], 0: [(3, 1)]}, buckets.top)
-        self.assertEqual({0: [(3, 5)], 0.5: [(4, 5)]}, buckets.bottom)
-        self.assertEqual({"left": [(0, 3)], "right": [(5, 3)]}, buckets.left_or_right)
+        buckets.sort_points_into_buckets((3, 3), coords)
+        self.assertEqual({1.0: [(1, 1), (2, 2)], inf: [(3, 5)], -0.0: [(0, 3)]}, buckets.left)
+        self.assertEqual({-1.0: [(5, 1)], -2.0: [(4, 1)], inf: [(3, 1)], 2.0: [(4, 5)], 0.0: [(5, 3)]}, buckets.right)
 
     def test_count_visible_asteroids(self):
         coords = [(1, 1), (2, 2), (5, 1), (4, 1), (3, 1), (3, 5), (4, 5), (0, 3), (5, 3), (3, 3)]
@@ -145,6 +146,55 @@ class TestDay7(unittest.TestCase):
     def test_day_10_part_1(self):
         with open("input.text") as f:
             self.assertEqual(((20, 18), 280), get_best_view(f.read()))
+
+    def test_sort_lists_in_buckets(self):
+        buckets = SlopeBuckets()
+        origin = (5, 5)
+        coords = [
+            (2, 2), (4, 4), (3, 3), (1, 1),  # top-left
+            (2, 8), (1, 9), (4, 6), (3, 7),  # bottom-left
+            (4, 5), (1, 5), (3, 5), (2, 5),  # straight left
+            (6, 4), (8, 2), (7, 3), (9, 1),  # top-right
+            (9, 9), (8, 8), (7, 7), (6, 6),  # bottom-right
+            (9, 5), (6, 5), (7, 5), (8, 5),  # straight right
+            (5, 4), (5, 1), (5, 2), (5, 3),  # straight up
+            (5, 6), (5, 7), (5, 8), (5, 9)   # straight down
+        ]
+        buckets.sort_points_into_buckets(origin, coords)
+        self.assertEqual(
+            {
+                -1.0: [(2, 8), (1, 9), (4, 6), (3, 7)],
+                -0.0: [(4, 5), (1, 5), (3, 5), (2, 5)],
+                1.0: [(2, 2), (4, 4), (3, 3), (1, 1)],
+                inf: [(5, 6), (5, 7), (5, 8), (5, 9)]
+            }, buckets.left
+        )
+        self.assertEqual(
+            {
+                -1.0: [(6, 4), (8, 2), (7, 3), (9, 1)],
+                0.0: [(9, 5), (6, 5), (7, 5), (8, 5)],
+                1.0: [(9, 9), (8, 8), (7, 7), (6, 6)],
+                inf: [(5, 4), (5, 1), (5, 2), (5, 3)]
+            }, buckets.right
+        )
+
+        buckets.sort_lists_in_buckets(origin)
+        self.assertEqual(
+            {
+                -1.0: [(4, 6), (3, 7), (2, 8), (1, 9)],
+                -0.0: [(4, 5), (3, 5), (2, 5), (1, 5)],
+                1.0: [(4, 4), (3, 3), (2, 2), (1, 1)],
+                inf: [(5, 6), (5, 7), (5, 8), (5, 9)]
+            }, buckets.left
+        )
+        self.assertEqual(
+            {
+                -1.0: [(6, 4), (7, 3), (8, 2), (9, 1)],
+                0.0: [(6, 5), (7, 5), (8, 5), (9, 5)],
+                1.0: [(6, 6), (7, 7), (8, 8), (9, 9)],
+                inf: [(5, 4), (5, 3), (5, 2), (5, 1)]
+            }, buckets.right
+        )
 
 
 if __name__ == "__main__":

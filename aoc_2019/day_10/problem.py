@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import Tuple, List
+from math import inf
+from typing import Tuple, List, Dict
 
 
 def str_to_grid(s):
@@ -17,7 +18,7 @@ def get_coords(grid) -> List[Tuple[int, int]]:
 
 def count_visible_asteroids(origin: Tuple[int, int], coords_list: List[Tuple[int, int]]):
     buckets = SlopeBuckets()
-    buckets.sort_points(origin, coords_list)
+    buckets.sort_points_into_buckets(origin, coords_list)
     return buckets.count_buckets()
 
 
@@ -37,27 +38,47 @@ def get_best_view(s):
 class SlopeBuckets:
 
     def __init__(self):
-        self.left_or_right = defaultdict(list)
-        self.top = defaultdict(list)
-        self.bottom = defaultdict(list)
+        self.left = defaultdict(list)
+        self.right = defaultdict(list)
 
     def put_slope_in_bucket(self, origin: Tuple[int, int], target: Tuple[int, int]):
         if origin == target:
             return
         x = target[0] - origin[0]
         y = target[1] - origin[1]
-        if y == 0:
-            self.left_or_right["left" if x < 0 else "right"].append(target)
-        elif y < 0:
-            self.top[x / y].append(target)
-        elif y > 0:
-            self.bottom[x / y].append(target)
+        if x == 0:
+            # If it's straight up, put it in the right section
+            if y < 0:
+                self.right[inf].append(target)
+            else:
+                self.left[inf].append(target)
+        elif x < 0:
+            self.left[y / x].append(target)
+        elif x > 0:
+            self.right[y / x].append(target)
         else:
             raise Exception("HALT AND CATCH FIRE")
 
     def count_buckets(self):
-        return len(self.left_or_right) + len(self.top) + len(self.bottom)
+        return len(self.left) + len(self.right)
 
-    def sort_points(self, origin: Tuple[int, int], coords_list: List[Tuple[int, int]]):
+    def sort_points_into_buckets(self, origin: Tuple[int, int], coords_list: List[Tuple[int, int]]):
         for coords in coords_list:
             self.put_slope_in_bucket(origin, coords)
+
+    def sort_lists_in_buckets(self, origin: Tuple[int, int]):
+        """
+        Go through each asteroid in the same slope value and sort by distance to the origin.
+        We can use manhattan distance to save processing power.
+        :param origin:
+        :return:
+        """
+        self.sort_bucket_list(origin, self.left)
+        self.sort_bucket_list(origin, self.right)
+
+    def sort_bucket_list(self, origin: Tuple[int, int], bucket: Dict[float, List[Tuple[int, int]]]):
+        def sort_key(coord: Tuple[int, int]):
+            return abs(coord[0] - origin[0]) + abs(coord[1] - origin[1])
+        for slope, coords_list in bucket.items():
+            coords_list.sort(key=sort_key)
+
