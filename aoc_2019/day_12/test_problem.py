@@ -236,7 +236,7 @@ class TestDay10(unittest.TestCase):
             system = MoonSystem.from_string(f.read())
         for _ in range(1000):
             system.time_step()
-        self.assertEqual(290 + 608 + 574 + 468, system.total_energy())
+        self.assertEqual(9999, system.total_energy())
 
     def test_hash(self):
         s = """
@@ -250,6 +250,17 @@ class TestDay10(unittest.TestCase):
         print(system)
         print(system.get_hash())
 
+    def test_find_factors(self):
+        self.assertEqual([2, 2, 2, 2], find_factors(16))
+        self.assertEqual([2, 2, 2, 3], find_factors(24))
+        self.assertEqual([2, 3, 3], find_factors(18))
+        self.assertEqual([2, 2, 7], find_factors(28))
+        self.assertEqual([2, 2, 11], find_factors(44))
+        print(find_factors(4686774924))
+
+    def test_find_lcm(self):
+        self.assertEqual(2772, find_lcm([18, 28, 44]))
+
     def test_loop_example_1(self):
         s = """
             <x=-1, y=0, z=2>
@@ -258,7 +269,8 @@ class TestDay10(unittest.TestCase):
             <x=3, y=5, z=-1>
         """
         system = MoonSystem.from_string(s)
-        self.assertEqual(2772, system.find_loop(2772))
+        loop_nums = system.find_loop(2772)
+        self.assertEqual(2772, find_lcm(loop_nums))
 
     def test_loop_example_2(self):
         s = """
@@ -268,14 +280,14 @@ class TestDay10(unittest.TestCase):
             <x=9, y=-8, z=-3>
         """
         system = MoonSystem.from_string(s)
-        i = 0
-        try:
-            for i in range(4686774925):
-                system.time_step()
-        except ValueError:
-            self.assertEqual(2772, i + 1)
-        else:
-            raise AssertionError("No loop detected")
+        loop_nums = system.find_loop(10000)
+        self.assertEqual(4686774924, find_lcm(loop_nums))
+
+    def test_day_12_part_2(self):
+        with open("input.text") as f:
+            system = MoonSystem.from_string(f.read())
+        loop_nums = system.find_loop(1000000)
+        self.assertEqual(282399002133976, find_lcm(loop_nums))
 
 
 if __name__ == "__main__":

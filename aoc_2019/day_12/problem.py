@@ -1,3 +1,4 @@
+from functools import reduce
 from re import match
 from typing import List
 
@@ -68,7 +69,8 @@ class MoonSystem:
 
     def __init__(self, moons: List[Moon]):
         self.moons = moons
-        self.initial_condition = self.get_hash()
+        self.initial_x, self.initial_y, self.initial_z = self.get_hash()
+        self.loops_x,self.loops_y, self.loops_z = None, None, None
 
     def apply_gravities(self):
         for m in self.moons:
@@ -81,10 +83,10 @@ class MoonSystem:
         for m in self.moons:
             m.apply_velocity()
 
-    def time_step(self):
+    def time_step(self, loops=0):
         self.apply_gravities()
         self.apply_velocities()
-        self.check_history()
+        self.check_history(loops)
 
     def total_energy(self):
         return sum([m.get_energy() for m in self.moons])
@@ -107,18 +109,52 @@ class MoonSystem:
             z_hash += z
         return x_hash, y_hash, z_hash
 
-    def check_history(self):
+    def check_history(self, loops):
         """
         Returns True if it detects a loop
         :return:
         """
-        if self.get_hash() == self.initial_condition:
-            raise ValueError(self)
+        x, y, z = self.get_hash()
+        if x == self.initial_x and not self.loops_x:
+            self.loops_x = loops + 1
+        if y == self.initial_y and not self.loops_y:
+            self.loops_y = loops + 1
+        if z == self.initial_z and not self.loops_z:
+            self.loops_z = loops + 1
+        if self.loops_x and self.loops_y and self.loops_z:
+            raise ValueError
 
     def find_loop(self, max_iters):
         i = 0
         try:
             for i in range(max_iters):
-                self.time_step()
-        except ValueError:
-            return i + 1
+                self.time_step(i)
+        except ValueError as e:
+            return self.loops_x, self.loops_y, self.loops_z
+
+
+def find_factors(n) -> List[List[int]]:
+    i = 2
+    factors = []
+    while i <= n:
+        if n % i == 0:
+            factors.append(i)
+            n /= i
+        else:
+            if i == 2:
+                i += 1
+            else:
+                i += 2
+    return factors
+
+
+def find_lcm(nums):
+    factors_list = [find_factors(n) for n in nums]
+    factor_set = set()
+    for m in factors_list:
+        for n in m:
+            factor_set.add(n)
+    lcm = 1
+    for f in factor_set:
+        lcm *= f ** max([factors.count(f) for factors in factors_list])
+    return lcm
