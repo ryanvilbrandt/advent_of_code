@@ -64,14 +64,14 @@ class TestDay10(unittest.TestCase):
 
     def test_get_energy(self):
         moon = Moon(Position(3, -1, 2), Velocity(-2, -5, 3))
-        self.assertEqual(16, moon.get_energy())
+        self.assertEqual(6 * 10, moon.get_energy())
 
     def test_total_energy(self):
         moon1 = Moon(Position(1, 1, 1), Velocity(1, 2, 3))
         moon2 = Moon(Position(2, 2, 2), Velocity(3, 2, 1))
         moon3 = Moon(Position(3, 3, 3), Velocity(-2, 0, 2))
         system = MoonSystem([moon1, moon2, moon3])
-        self.assertEqual(3 + 6 + 6 + 6 + 9 + 4, system.total_energy())
+        self.assertEqual(3 * 6 + 6 * 6 + 9 * 4, system.total_energy())
 
     def test_from_string(self):
         moon = Moon.from_string("<x=-1, y=0, z=2>")
@@ -89,6 +89,135 @@ class TestDay10(unittest.TestCase):
         self.assertEqual(Position(2, -10, -7), system.moons[1].position)
         self.assertEqual(Position(4, -8, 8), system.moons[2].position)
         self.assertEqual(Position(3, 5, -1), system.moons[3].position)
+
+    def test_part_12_example_1(self):
+        s = """
+            <x=-1, y=0, z=2>
+            <x=2, y=-10, z=-7>
+            <x=4, y=-8, z=8>
+            <x=3, y=5, z=-1>
+        """
+        system = MoonSystem.from_string(s)
+        self.assertEqual(Position(-1, 0, 2), system.moons[0].position)
+        self.assertEqual(Velocity(0, 0, 0), system.moons[0].velocity)
+        self.assertEqual(Position(2, -10, -7), system.moons[1].position)
+        self.assertEqual(Velocity(0, 0, 0), system.moons[1].velocity)
+        self.assertEqual(Position(4, -8, 8), system.moons[2].position)
+        self.assertEqual(Velocity(0, 0, 0), system.moons[2].velocity)
+        self.assertEqual(Position(3, 5, -1), system.moons[3].position)
+        self.assertEqual(Velocity(0, 0, 0), system.moons[3].velocity)
+
+        # Time step 1
+        system.time_step()
+        self.assertEqual(Position(2, -1, 1), system.moons[0].position)
+        self.assertEqual(Velocity(3, -1, -1), system.moons[0].velocity)
+        self.assertEqual(Position(3, -7, -4), system.moons[1].position)
+        self.assertEqual(Velocity(1, 3, 3), system.moons[1].velocity)
+        self.assertEqual(Position(1, -7, 5), system.moons[2].position)
+        self.assertEqual(Velocity(-3, 1, -3), system.moons[2].velocity)
+        self.assertEqual(Position(2, 2, 0), system.moons[3].position)
+        self.assertEqual(Velocity(-1, -3, 1), system.moons[3].velocity)
+
+        # Time step 2
+        system.time_step()
+        self.assertEqual(Position(5, -3, -1), system.moons[0].position)
+        self.assertEqual(Velocity(3, -2, -2), system.moons[0].velocity)
+        self.assertEqual(Position(1, -2, 2), system.moons[1].position)
+        self.assertEqual(Velocity(-2, 5, 6), system.moons[1].velocity)
+        self.assertEqual(Position(1, -4, -1), system.moons[2].position)
+        self.assertEqual(Velocity(0, 3, -6), system.moons[2].velocity)
+        self.assertEqual(Position(1, -4, 2), system.moons[3].position)
+        self.assertEqual(Velocity(-1, -6, 2), system.moons[3].velocity)
+
+        # Time step 3
+        system.time_step()
+        self.assertEqual(Position(5, -6, -1), system.moons[0].position)
+        self.assertEqual(Velocity(0, -3, 0), system.moons[0].velocity)
+        self.assertEqual(Position(0, 0, 6), system.moons[1].position)
+        self.assertEqual(Velocity(-1, 2, 4), system.moons[1].velocity)
+        self.assertEqual(Position(2, 1, -5), system.moons[2].position)
+        self.assertEqual(Velocity(1, 5, -4), system.moons[2].velocity)
+        self.assertEqual(Position(1, -8, 2), system.moons[3].position)
+        self.assertEqual(Velocity(0, -4, 0), system.moons[3].velocity)
+
+        # Time step 4
+        system.time_step()
+        self.assertEqual(Position(2, -8, 0), system.moons[0].position)
+        self.assertEqual(Velocity(-3, -2, 1), system.moons[0].velocity)
+        self.assertEqual(Position(2, 1, 7), system.moons[1].position)
+        self.assertEqual(Velocity(2, 1, 1), system.moons[1].velocity)
+        self.assertEqual(Position(2, 3, -6), system.moons[2].position)
+        self.assertEqual(Velocity(0, 2, -1), system.moons[2].velocity)
+        self.assertEqual(Position(2, -9, 1), system.moons[3].position)
+        self.assertEqual(Velocity(1, -1, -1), system.moons[3].velocity)
+
+        # Time step 5
+        system.time_step()
+        self.assertEqual(Position(-1, -9, 2), system.moons[0].position)
+        self.assertEqual(Velocity(-3, -1, 2), system.moons[0].velocity)
+        self.assertEqual(Position(4, 1, 5), system.moons[1].position)
+        self.assertEqual(Velocity(2, 0, -2), system.moons[1].velocity)
+        self.assertEqual(Position(2, 2, -4), system.moons[2].position)
+        self.assertEqual(Velocity(0, -1, 2), system.moons[2].velocity)
+        self.assertEqual(Position(3, -7, -1), system.moons[3].position)
+        self.assertEqual(Velocity(1, 2, -2), system.moons[3].velocity)
+
+        # Time step 6
+        system.time_step()
+        self.assertEqual(Position(-1, -7, 3), system.moons[0].position)
+        self.assertEqual(Velocity(0, 2, 1), system.moons[0].velocity)
+        self.assertEqual(Position(3, 0, 0), system.moons[1].position)
+        self.assertEqual(Velocity(-1, -1, -5), system.moons[1].velocity)
+        self.assertEqual(Position(3, -2, 1), system.moons[2].position)
+        self.assertEqual(Velocity(1, -4, 5), system.moons[2].velocity)
+        self.assertEqual(Position(3, -4, -2), system.moons[3].position)
+        self.assertEqual(Velocity(0, 3, -1), system.moons[3].velocity)
+
+        # Time step 7
+        system.time_step()
+        self.assertEqual(Position(2, -2, 1), system.moons[0].position)
+        self.assertEqual(Velocity(3, 5, -2), system.moons[0].velocity)
+        self.assertEqual(Position(1, -4, -4), system.moons[1].position)
+        self.assertEqual(Velocity(-2, -4, -4), system.moons[1].velocity)
+        self.assertEqual(Position(3, -7, 5), system.moons[2].position)
+        self.assertEqual(Velocity(0, -5, 4), system.moons[2].velocity)
+        self.assertEqual(Position(2, 0, 0), system.moons[3].position)
+        self.assertEqual(Velocity(-1, 4, 2), system.moons[3].velocity)
+
+        # Time step 8
+        system.time_step()
+        self.assertEqual(Position(5, 2, -2), system.moons[0].position)
+        self.assertEqual(Velocity(3, 4, -3), system.moons[0].velocity)
+        self.assertEqual(Position(2, -7, -5), system.moons[1].position)
+        self.assertEqual(Velocity(1, -3, -1), system.moons[1].velocity)
+        self.assertEqual(Position(0, -9, 6), system.moons[2].position)
+        self.assertEqual(Velocity(-3, -2, 1), system.moons[2].velocity)
+        self.assertEqual(Position(1, 1, 3), system.moons[3].position)
+        self.assertEqual(Velocity(-1, 1, 3), system.moons[3].velocity)
+
+        # Time step 9
+        system.time_step()
+        self.assertEqual(Position(5, 3, -4), system.moons[0].position)
+        self.assertEqual(Velocity(0, 1, -2), system.moons[0].velocity)
+        self.assertEqual(Position(2, -9, -3), system.moons[1].position)
+        self.assertEqual(Velocity(0, -2, 2), system.moons[1].velocity)
+        self.assertEqual(Position(0, -8, 4), system.moons[2].position)
+        self.assertEqual(Velocity(0, 1, -2), system.moons[2].velocity)
+        self.assertEqual(Position(1, 1, 5), system.moons[3].position)
+        self.assertEqual(Velocity(0, 0, 2), system.moons[3].velocity)
+
+        # Time step 10
+        system.time_step()
+        self.assertEqual(Position(2, 1, -3), system.moons[0].position)
+        self.assertEqual(Velocity(-3, -2, 1), system.moons[0].velocity)
+        self.assertEqual(Position(1, -8, 0), system.moons[1].position)
+        self.assertEqual(Velocity(-1, 1, 3), system.moons[1].velocity)
+        self.assertEqual(Position(3, -6, 1), system.moons[2].position)
+        self.assertEqual(Velocity(3, 2, -3), system.moons[2].velocity)
+        self.assertEqual(Position(2, 0, 4), system.moons[3].position)
+        self.assertEqual(Velocity(1, -1, -1), system.moons[3].velocity)
+
+        self.assertEqual(36 + 45 + 80 + 18, system.total_energy())
 
 
 if __name__ == "__main__":

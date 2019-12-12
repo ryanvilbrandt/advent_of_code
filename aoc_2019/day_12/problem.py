@@ -44,7 +44,9 @@ class Moon:
             self.position[i] += vel
 
     def get_energy(self):
-        return sum([abs(n) for n in self.position] + [abs(n) for n in self.velocity])
+        potential_energy = [abs(n) for n in self.position]
+        kinetic_energy = [abs(n) for n in self.velocity]
+        return sum(potential_energy) * sum(kinetic_energy)
 
     def __repr__(self):
         return "Moon({}, {})".format(self.position, self.velocity)
