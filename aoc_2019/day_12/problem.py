@@ -58,11 +58,17 @@ class Moon:
             raise ValueError("Invalid position string: {}".format(s))
         return Moon(Position(int(m.group(1)), int(m.group(2)), int(m.group(3))), Velocity())
 
+    def get_hash(self):
+        return (self.position[0], self.velocity[0]), \
+               (self.position[1], self.velocity[1]), \
+               (self.position[2], self.velocity[2])
+
 
 class MoonSystem:
 
     def __init__(self, moons: List[Moon]):
         self.moons = moons
+        self.initial_condition = self.get_hash()
 
     def apply_gravities(self):
         for m in self.moons:
@@ -78,6 +84,7 @@ class MoonSystem:
     def time_step(self):
         self.apply_gravities()
         self.apply_velocities()
+        self.check_history()
 
     def total_energy(self):
         return sum([m.get_energy() for m in self.moons])
@@ -88,3 +95,30 @@ class MoonSystem:
     @staticmethod
     def from_string(system_string):
         return MoonSystem([Moon.from_string(s.strip()) for s in system_string.strip().split("\n")])
+
+    def get_hash(self):
+        x_hash = tuple()
+        y_hash = tuple()
+        z_hash = tuple()
+        for m in self.moons:
+            x, y, z = m.get_hash()
+            x_hash += x
+            y_hash += y
+            z_hash += z
+        return x_hash, y_hash, z_hash
+
+    def check_history(self):
+        """
+        Returns True if it detects a loop
+        :return:
+        """
+        if self.get_hash() == self.initial_condition:
+            raise ValueError(self)
+
+    def find_loop(self, max_iters):
+        i = 0
+        try:
+            for i in range(max_iters):
+                self.time_step()
+        except ValueError:
+            return i + 1

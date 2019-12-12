@@ -219,6 +219,64 @@ class TestDay10(unittest.TestCase):
 
         self.assertEqual(36 + 45 + 80 + 18, system.total_energy())
 
+    def test_day_12_example_2(self):
+        s = """
+            <x=-8, y=-10, z=0>
+            <x=5, y=5, z=10>
+            <x=2, y=-7, z=3>
+            <x=9, y=-8, z=-3>
+        """
+        system = MoonSystem.from_string(s)
+        for _ in range(100):
+            system.time_step()
+        self.assertEqual(290 + 608 + 574 + 468, system.total_energy())
+
+    def test_day_12_part_1(self):
+        with open("input.text") as f:
+            system = MoonSystem.from_string(f.read())
+        for _ in range(1000):
+            system.time_step()
+        self.assertEqual(290 + 608 + 574 + 468, system.total_energy())
+
+    def test_hash(self):
+        s = """
+            <x=1, y=2, z=3>
+            <x=3, y=2, z=1>
+        """
+        system = MoonSystem.from_string(s)
+        print(system)
+        print(system.get_hash())
+        system.time_step()
+        print(system)
+        print(system.get_hash())
+
+    def test_loop_example_1(self):
+        s = """
+            <x=-1, y=0, z=2>
+            <x=2, y=-10, z=-7>
+            <x=4, y=-8, z=8>
+            <x=3, y=5, z=-1>
+        """
+        system = MoonSystem.from_string(s)
+        self.assertEqual(2772, system.find_loop(2772))
+
+    def test_loop_example_2(self):
+        s = """
+            <x=-8, y=-10, z=0>
+            <x=5, y=5, z=10>
+            <x=2, y=-7, z=3>
+            <x=9, y=-8, z=-3>
+        """
+        system = MoonSystem.from_string(s)
+        i = 0
+        try:
+            for i in range(4686774925):
+                system.time_step()
+        except ValueError:
+            self.assertEqual(2772, i + 1)
+        else:
+            raise AssertionError("No loop detected")
+
 
 if __name__ == "__main__":
     unittest.main()
