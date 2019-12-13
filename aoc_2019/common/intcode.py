@@ -28,8 +28,10 @@ class IntCode:
             tape[i] = v
         return tape
 
-    def get_tape(self):
-        return [self.tape[i] for i in range(max(self.tape.keys()) + 1)]
+    def get_tape(self, start=0, end=None):
+        if end is None:
+            end = max(self.tape.keys()) + 1
+        return [self.tape[i] for i in range(start, end)]
 
     def add_to_input_buffer(self, value):
         self.input_buffer.append(value)

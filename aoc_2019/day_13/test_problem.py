@@ -49,6 +49,58 @@ class TestDay10(unittest.TestCase):
             }, ag.get_tile_count()
         )
 
+    def test_print_screen_1(self):
+        ag = ArcadeGame("99")
+        ag.create_tile(2, 2, 0)
+        ag.create_tile(3, 2, 1)
+        ag.create_tile(2, 3, 2)
+        ag.create_tile(3, 3, 3)
+        ag.create_tile(2, 4, 4)
+        ag.print_screen()
+
+    def test_print_screen_2(self):
+        ag = ArcadeGame("99")
+        ag.create_tile(0, 0, Tile.WALL)
+        ag.create_tile(1, 0, Tile.WALL)
+        ag.create_tile(2, 0, Tile.WALL)
+        ag.create_tile(3, 0, Tile.WALL)
+        ag.create_tile(4, 0, Tile.WALL)
+
+        ag.create_tile(0, 1, Tile.WALL)
+        ag.create_tile(1, 1, Tile.BLOCK)
+        ag.create_tile(2, 1, Tile.BLOCK)
+        ag.create_tile(3, 1, Tile.BLOCK)
+        ag.create_tile(4, 1, Tile.WALL)
+
+        ag.create_tile(0, 2, Tile.WALL)
+        ag.create_tile(1, 2, Tile.BLOCK)
+        ag.create_tile(2, 2, Tile.BLOCK)
+        ag.create_tile(3, 2, Tile.BLOCK)
+        ag.create_tile(4, 2, Tile.WALL)
+
+        ag.create_tile(0, 3, Tile.WALL)
+        ag.create_tile(2, 3, Tile.BALL)
+        ag.create_tile(4, 3, Tile.WALL)
+
+        ag.create_tile(0, 4, Tile.WALL)
+        ag.create_tile(2, 4, Tile.HORIZONTAL_PADDLE)
+        ag.create_tile(4, 4, Tile.WALL)
+
+        ag.print_screen()
+
+    @unittest.skip
+    def test_print_screen_3(self):
+        with open("input.text") as f:
+            ag = ArcadeGame(f.read())
+        ag.start_game()
+        ag.print_screen()
+
+    def test_day_13_part_2(self):
+        with open("input.text") as f:
+            ag = ArcadeGame(f.read())
+        ag.start_game(add_quarter=True)
+        self.assertEqual(10547, ag.score)
+
 
 if __name__ == "__main__":
     unittest.main()
