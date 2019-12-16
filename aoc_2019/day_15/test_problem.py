@@ -45,7 +45,7 @@ class TestDay15(unittest.TestCase):
         self.assertEqual(RoomObject.FLOOR, robot.move(Direction.NORTH))
         self.assertEqual("#D\n.O", robot.get_grid())
 
-    def test_day_15_example_1(self):
+    def test_example_1_get_grid(self):
         moves = [
             (Direction.NORTH, RoomObject.WALL),
             (Direction.EAST, RoomObject.FLOOR),
@@ -65,6 +65,21 @@ class TestDay15(unittest.TestCase):
             m.run.return_value = output.value
             self.assertEqual(output, robot.move(direction))
         self.assertEqual(EXAMPLE_1_OUTPUT, robot.get_grid())
+
+    def test_example_1(self):
+        robot = Robot()
+        with open("input.text") as f:
+            robot.run_intcode(f.read())
+
+    def test_pick_next_direction(self):
+        robot = Robot()
+        self.assertEqual(Direction.NORTH, robot.pick_next_direction())
+        robot.grid[tuple(robot.attempt_move(Direction.NORTH))] = RoomObject.WALL
+        self.assertEqual(Direction.EAST, robot.pick_next_direction())
+        robot.grid[tuple(robot.attempt_move(Direction.EAST))] = RoomObject.WALL
+        self.assertEqual(Direction.SOUTH, robot.pick_next_direction())
+        robot.grid[tuple(robot.attempt_move(Direction.SOUTH))] = RoomObject.WALL
+        self.assertEqual(Direction.WEST, robot.pick_next_direction())
 
 
 if __name__ == "__main__":
