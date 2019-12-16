@@ -42,6 +42,7 @@ class IntCode:
             if self.index >= len(self.tape):
                 raise OutOfTapeException()
             # self.print_tape()
+            # self.pprint_instruction(self.index, unroll=True)
             output = self.instruction()
             if output is not None:
                 return output
@@ -182,49 +183,59 @@ class IntCode:
     def pprint(self):
         index = 0
         while index < len(self.tape):
-            op_code = self.tape[index]
-            mode_op = op_code % 100
-            mode_params = op_code // 100
-            if mode_op == 1:
-                op = "add"
-                num_params = 3
-            elif mode_op == 2:
-                op = "mul"
-                num_params = 3
-            elif mode_op == 3:
-                op = "inp"
-                num_params = 1
-            elif mode_op == 4:
-                op = "out"
-                num_params = 1
-            elif mode_op == 5:
-                op = "jmt"
-                num_params = 2
-            elif mode_op == 6:
-                op = "jmf"
-                num_params = 2
-            elif mode_op == 7:
-                op = "lth"
-                num_params = 3
-            elif mode_op == 8:
-                op = "equ"
-                num_params = 3
-            elif mode_op == 9:
-                op = "rel"
-                num_params = 1
-            elif mode_op == 99:
-                op = "hal"
-                num_params = 0
-            else:
-                op = "nop"
-                num_params = 0
-            params = []
-            for i in range(num_params):
-                param_mode = {0: "pos", 1: "imm", 2: "rel"}[mode_params % 10]
-                mode_params //= 10
-                params.append("{}({})".format(param_mode, self.tape[index + i + 1]))
-            print("{:>04} {} {}".format(index, op, " ".join(params)))
+            num_params = self.pprint_instruction(index)
             index += 1 + num_params
+
+    def pprint_instruction(self, index, unroll=False):
+        op_code = self.tape[index]
+        mode_op = op_code % 100
+        mode_params = op_code // 100
+        if mode_op == 1:
+            op = "add"
+            num_params = 3
+        elif mode_op == 2:
+            op = "mul"
+            num_params = 3
+        elif mode_op == 3:
+            op = "inp"
+            num_params = 1
+        elif mode_op == 4:
+            op = "out"
+            num_params = 1
+        elif mode_op == 5:
+            op = "jmt"
+            num_params = 2
+        elif mode_op == 6:
+            op = "jmf"
+            num_params = 2
+        elif mode_op == 7:
+            op = "lth"
+            num_params = 3
+        elif mode_op == 8:
+            op = "equ"
+            num_params = 3
+        elif mode_op == 9:
+            op = "rel"
+            num_params = 1
+        elif mode_op == 99:
+            op = "hal"
+            num_params = 0
+        else:
+            op = "nop"
+            num_params = 0
+        params = []
+        for i in range(num_params):
+            param_mode = {0: "pos", 1: "imm", 2: "rel"}[mode_params % 10]
+            mode_params //= 10
+            param_value = self.tape[index + i + 1]
+            if unroll:
+                if param_mode == "pos":
+                    param_value = "{} -> {}".format(param_value, self.tape[param_value])
+                elif param_mode == "rel":
+                    param_value = "{} -> {}".format(param_value, self.tape[self.relative_base + param_value])
+            params.append("{}({})".format(param_mode, param_value))
+        print("{:>04} {} {}".format(index, op, " ".join(params)))
+        return num_params
 
 
 class OutOfTapeException(Exception):

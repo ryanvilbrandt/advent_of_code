@@ -150,6 +150,18 @@ class TestIntCode(unittest.TestCase):
         ]
         self.assertEqual("\n".join(expected) + "\n", f.getvalue())
 
+    def test_pprint_instruction(self):
+        f = StringIO()
+        with redirect_stdout(f):
+            IntCode("3,21,1008,21,8,20").pprint_instruction(2)
+        self.assertEqual("0002 equ pos(21) imm(8) pos(20)\n", f.getvalue())
+
+    def test_pprint_instruction_unroll(self):
+        f = StringIO()
+        with redirect_stdout(f):
+            IntCode("3,21,8,0,1,2").pprint_instruction(2, unroll=True)
+        self.assertEqual("0002 equ pos(0 -> 3) pos(1 -> 21) pos(2 -> 8)\n", f.getvalue())
+
     def test_relative_base(self):
         intcode = IntCode("109,15,204,-6,109,-10,204,5,99,27,28")
         self.assertEqual(0, intcode.relative_base)
