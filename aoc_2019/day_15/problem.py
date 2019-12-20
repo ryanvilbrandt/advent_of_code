@@ -1,4 +1,3 @@
-import curses
 from collections import defaultdict
 from enum import Enum
 from typing import List
@@ -45,31 +44,24 @@ class Robot:
     intcode = None
     coords = None
     grid = None
-    wall_to_follow = None
     stdscr = None
     pad = None
     oxygen_location = None
-    last_direction = None
+    last_move = None
 
-    def __init__(self, starting_coord: List[int]=None, use_curses=False):
+    def __init__(self, starting_coord: List[int]=None):
         self.coords = [0, 0] if starting_coord is None else list(starting_coord)
         self.grid = defaultdict(lambda: RoomObject.EMPTY)
         self.grid[tuple(self.coords)] = RoomObject.FLOOR
         self.last_direction = Direction.NORTH
-        if use_curses:
-            self.coords = [50, 50]
-            self.stdscr = curses.initscr()
-            self.stdscr.noecho()
-            self.stdscr.cbreak()
-            self.pad = curses.newpad(100, 100)
 
     def run_intcode(self, program: str):
         self.intcode = IntCode(program)
-        self.wall_to_follow = Direction.NORTH
+        self.last_move = Direction.NORTH
         try:
             while True:
-                self.last_direction = self.pick_next_direction()
-                if self.move(self.last_direction) == RoomObject.OXYGEN_SYSTEM:
+                direction = self.pick_next_direction()
+                if self.move(direction) == RoomObject.OXYGEN_SYSTEM:
                     self.oxygen_location = self.coords
                 if self.oxygen_location and self.coords == [0, 0]:
                     break
@@ -105,17 +97,19 @@ class Robot:
         self.grid[tuple(target_location)] = RoomObject(output)
         if output != 0:
             self.coords = target_location
+            self.last_move = direction
 
     def pick_next_direction(self):
-        direction_to_check = self.last_direction
-        direction_list = [direction_to_check, direction_to_check.clockwise(), direction_to_check.counterclockwise()]
+        direction_to_check = self.last_move
+        direction_list = [direction_to_check.clockwise(), direction_to_check.counterclockwise(), direction_to_check]
         for d in direction_list:
-            if self.adjacent_obj(direction_to_check) == RoomObject.EMPTY:
-                return direction_to_check
+            if self.adjacent_obj(d) == RoomObject.EMPTY:
+                return d
         for d in direction_list:
-            if self.adjacent_obj(direction_to_check) != RoomObject.WALL:
-                return direction_to_check
-        return direction_to_check.clockwise().clockwise()
+            if self.adjacent_obj(d) != RoomObject.WALL:
+                return d
+        self.last_move = direction_to_check.clockwise()
+        return self.last_move
 
     def adjacent_obj(self, direction):
         x, y = self.coords
