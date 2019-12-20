@@ -9,6 +9,7 @@ EXAMPLE_1_OUTPUT = """ ##
 D.# 
  #  """
 
+
 class TestDay15(unittest.TestCase):
 
     def test_Direction(self):
@@ -67,8 +68,8 @@ class TestDay15(unittest.TestCase):
         self.assertEqual(EXAMPLE_1_OUTPUT, robot.get_grid())
 
     def test_example_1(self):
-        robot = Robot()
-        with open("input.text") as f:
+        robot = Robot(use_curses=True)
+        with open("aoc_2019/day_15/input.text") as f:
             robot.run_intcode(f.read())
 
     def test_pick_next_direction(self):
