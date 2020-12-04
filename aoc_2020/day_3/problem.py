@@ -1,7 +1,4 @@
-import re
 from math import prod
-
-from aoc_2020.common import NoRegexMatch, text_to_list
 
 
 def check_for_tree_on_grid(grid, x, y):
