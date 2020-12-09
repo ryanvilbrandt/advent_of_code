@@ -1,10 +1,10 @@
 from itertools import combinations
-from typing import Set, List
+from typing import Set, List, Iterable
 
 from aoc_2020.common import text_to_list
 
 
-def get_all_sums(num_list: List[int]) -> Set[int]:
+def get_all_sums(num_list: Iterable[int]) -> Set[int]:
     return set(map(lambda x: x[0] + x[1], combinations(num_list, r=2)))
 
 
@@ -23,8 +23,8 @@ def load_and_find_invalid_number(s: str, preamble_length=25):
 def find_contiguous_numbers(num_list: List[int], target_number: int) -> List[int]:
     for i in range(1, len(num_list)):
         for j in range(len(num_list) - i):
-            if sum(num_list[i:j]) == target_number:
-                return num_list[i:j]
+            if sum(num_list[j:i]) == target_number:
+                return num_list[j:i]
 
 
 def part_2(s, preamble_length=25):
