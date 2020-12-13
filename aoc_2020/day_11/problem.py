@@ -56,21 +56,58 @@ class Grid:
         ]
 
 
-def run_cycle(grid: Grid) -> Grid:
+def count_visible_occupied_seats(grid, x, y):
+    directions = [(-1, -1), (-1, +0), (-1, +1),
+                  (+0, -1), (+0, +1),
+                  (+1, -1), (+1, +0), (+1, +1)]
+    visible_occupied_seats = 0
+    for d in directions:
+        i = 1
+        while True:
+            seat = grid.get(x + d[0] * i, y + d[1] * i)
+            if seat != ".":
+                break
+            i += 1
+        if seat == "#":
+            visible_occupied_seats += 1
+    return visible_occupied_seats
+
+
+def run_cycle_part_1(grid: Grid) -> Grid:
     new_grid = grid.copy()
     for x, y, cell in grid:
         if cell != ".":
-            adjacent_seats = grid.get_adjacent_cells(x, y)
-            if cell == "L" and adjacent_seats.count("#") == 0:
+            seats = grid.get_adjacent_cells(x, y)
+            if cell == "L" and seats.count("#") == 0:
                 new_grid.set(x, y, "#")
-            elif cell == "#" and adjacent_seats.count("#") >= 4:
+            elif cell == "#" and seats.count("#") >= 4:
                 new_grid.set(x, y, "L")
     return new_grid
 
 
-def run_until_stable(grid: Grid) -> Grid:
-    new_grid = run_cycle(grid)
+def run_until_stable_part_1(grid: Grid) -> Grid:
+    new_grid = run_cycle_part_1(grid)
     while new_grid != grid:
         grid = new_grid
-        new_grid = run_cycle(grid)
+        new_grid = run_cycle_part_1(grid)
+    return new_grid
+
+
+def run_cycle_part_2(grid: Grid) -> Grid:
+    new_grid = grid.copy()
+    for x, y, cell in grid:
+        if cell != ".":
+            visible_occupied_seats = count_visible_occupied_seats(grid, x, y)
+            if visible_occupied_seats == 0:
+                new_grid.set(x, y, "#")
+            elif visible_occupied_seats >= 5:
+                new_grid.set(x, y, "L")
+    return new_grid
+
+
+def run_until_stable_part_2(grid: Grid) -> Grid:
+    new_grid = run_cycle_part_2(grid)
+    while new_grid != grid:
+        grid = new_grid
+        new_grid = run_cycle_part_2(grid)
     return new_grid
