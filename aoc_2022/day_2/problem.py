@@ -20,7 +20,7 @@ win_map = {
     "C": "X",
 }
 
-win_map_v2 = {
+score_map_v2 = {
     "A X": 3 + 0,
     "A Y": 1 + 3,
     "A Z": 2 + 6,
@@ -53,4 +53,4 @@ def follow_strategy_guide(text):
 
 def follow_strategy_guide_v2(text):
     guide = text_to_list(text)
-    return sum(win_map_v2[line] for line in guide)
+    return sum(score_map_v2[line] for line in guide)
