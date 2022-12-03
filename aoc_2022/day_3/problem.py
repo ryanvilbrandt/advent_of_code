@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 from aoc_2022.common import text_to_list
 

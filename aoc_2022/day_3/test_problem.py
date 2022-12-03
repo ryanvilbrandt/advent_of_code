@@ -2,7 +2,6 @@ import unittest
 from pathlib import Path
 
 from problem import *
-from aoc_2022.common import text_to_list
 
 EXAMPLE_TEXT = """
 vJrwpWtwJgWrhcsFMMfFFhFp
