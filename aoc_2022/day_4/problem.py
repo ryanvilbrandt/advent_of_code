@@ -10,10 +10,9 @@ def text_to_assignments(text: str) -> Tuple[Tuple[int, int], Tuple[int, int]]:
 
 
 def is_complete_overlap(text: str) -> bool:
-    first, second = text_to_assignments(text)
-    if first[0] <= second[0] and first[1] >= second[1]:
-        return True
-    return first[0] >= second[0] and first[1] <= second[1]
+    s1, s2 = text_to_assignments(text)
+    return (s1[0] <= s2[0] <= s1[1] and s1[0] <= s2[1] <= s1[1]) or \
+           (s2[0] <= s1[0] <= s2[1] and s2[0] <= s1[1] <= s2[1])
 
 
 def count_complete_overlaps(text: str) -> int:
@@ -22,10 +21,9 @@ def count_complete_overlaps(text: str) -> int:
 
 
 def is_partial_overlap(text: str) -> int:
-    first, second = text_to_assignments(text)
-    first_set = set(range(first[0], first[1] + 1))
-    second_set = set(range(second[0], second[1] + 1))
-    return bool(first_set.intersection(second_set))
+    s1, s2 = text_to_assignments(text)
+    return (s1[0] <= s2[0] <= s1[1] or s1[0] <= s2[1] <= s1[1]) or \
+           (s2[0] <= s1[0] <= s2[1] or s2[0] <= s1[1] <= s2[1])
 
 
 def count_partial_overlaps(text: str) -> int:
