@@ -7,6 +7,9 @@ def text_to_list(text: str):
         yield line.strip(" ")
 
 
-def text_to_grid(text: str, convert: callable = str) -> list[list[Any]]:
+def text_to_grid(text: str, delimiter: str = "", convert: callable = str) -> list[list[Any]]:
     for line in text_to_list(text):
-        yield [convert(item) for item in re.split(r"\s+", line)]
+        if not delimiter:
+            yield list(line)
+        else:
+            yield [convert(item) for item in re.split(r"\s+", line)]
