@@ -29,7 +29,6 @@ class TestDay2(unittest.TestCase):
 
     def test_safe_with_dampening(self):
         self.assertEqual(2, check_safety([55, 56, 55, 53, 51, 50]))
-        self.assertEqual(2, check_safety([55, 56, 55, 53, 51, 50]))
 
     def test_part_2(self):
         grid = text_to_grid(open("input.text").read(), convert=int)
