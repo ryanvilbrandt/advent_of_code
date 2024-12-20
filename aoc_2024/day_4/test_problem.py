@@ -16,6 +16,14 @@ MAMMMXMMMM
 MXMXAXMASX
 """
 
+FAIL_TEST = """
+.....
+.M.S.
+..A..
+.S.M.
+.....
+"""
+
 
 class TestDay2(unittest.TestCase):
 
@@ -43,6 +51,10 @@ class TestDay2(unittest.TestCase):
         grid = list(text_to_grid(EXAMPLE_TEXT))
         self.assertEqual(9, find_all_x_mas(grid))
 
+    def test_fail(self):
+        grid = list(text_to_grid(FAIL_TEST))
+        self.assertEqual(0, find_all_x_mas(grid))
+
     def test_part_2(self):
         grid = list(text_to_grid(open("input.text").read()))
-        self.assertEqual(2344, find_all_x_mas(grid))
+        self.assertEqual(1859, find_all_x_mas(grid))
