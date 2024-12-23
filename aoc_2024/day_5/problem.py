@@ -60,8 +60,18 @@ def fix_pages_and_get_sum(text_list: list[str]) -> int:
     for page_list in page_lists:
         # print(page_list)
         if not check_pages(rules, page_list):
-            # print("Good!")
+            # print("Fixing pages...")
             fixed_pages = fix_pages(rules, page_list)
+            sum += get_middle_page(fixed_pages)
+    return sum
+
+
+def fix_pages_and_get_sum_2(text_list: list[str]) -> int:
+    rules, page_lists = get_rules_and_page_lists(text_list)
+    sum = 0
+    for page_list in page_lists:
+        fixed_pages = fix_pages(rules, page_list)
+        if page_list != fixed_pages:
             sum += get_middle_page(fixed_pages)
     return sum
 
@@ -71,6 +81,7 @@ def fix_pages(rules: Rules, pages: list[int]):
     Sorts a list of pages based on the precedency-rules.
     """
     def cmp(a, b):
+        # print('cmp!')
         if a == b:
             return 0
         if b in rules[a]:

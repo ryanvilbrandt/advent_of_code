@@ -37,12 +37,17 @@ EXAMPLE_TEXT = """
 
 class TestDay(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        with open("input.text") as f:
+            cls.input_text = f.read()
+
     def test_example_1(self):
         text_list = text_to_list(EXAMPLE_TEXT)
         self.assertEqual(143, get_middle_page_sum(text_list))
 
     def test_part_1(self):
-        text_list = text_to_list(open("input.text").read())
+        text_list = text_to_list(self.input_text)
         self.assertEqual(5588, get_middle_page_sum(text_list))
 
     def test_fix_pages(self):
@@ -63,8 +68,8 @@ class TestDay(unittest.TestCase):
 
     def test_example_2(self):
         text_list = text_to_list(EXAMPLE_TEXT)
-        self.assertEqual(123, fix_pages_and_get_sum(text_list))
+        self.assertEqual(123, fix_pages_and_get_sum_2(text_list))
 
     def test_part_2(self):
-        text_list = text_to_list(open("input.text").read())
-        self.assertEqual(5331, fix_pages_and_get_sum(text_list))
+        text_list = text_to_list(self.input_text)
+        self.assertEqual(5331, fix_pages_and_get_sum_2(text_list))
