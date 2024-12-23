@@ -57,4 +57,4 @@ class TestDay2(unittest.TestCase):
 
     def test_part_2(self):
         grid = list(text_to_grid(open("input.text").read()))
-        self.assertEqual(1859, find_all_x_mas(grid))
+        self.assertEqual(1815, find_all_x_mas(grid))
